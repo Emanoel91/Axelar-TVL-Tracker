@@ -5,6 +5,9 @@ on:
     - cron: '0 6 * * *'  # هر روز ساعت ۶ صبح UTC اجرا می‌شود
   workflow_dispatch:      # اجازه اجرای دستی هم می‌دهد
 
+  permissions:
+  contents: write   # ← این خط اضافه شد
+
 jobs:
   update-data:
     runs-on: ubuntu-latest
