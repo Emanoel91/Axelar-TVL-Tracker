@@ -24,7 +24,7 @@ df = df.dropna(subset=["tvl"])
 # مرتب‌سازی داده‌ها
 df = df.sort_values("date")
 
-st.title("Axelar TVL Dashboard")
+st.title("💸Axelar TVL Monitoring: ITS vs. Non-ITS")
 
 # --- ردیف اول: Stacked Bar Chart با ITS بالای non-ITS و خط مجموع TVL ---
 st.subheader("Axelar TVL Over Time - Stacked Bar")
