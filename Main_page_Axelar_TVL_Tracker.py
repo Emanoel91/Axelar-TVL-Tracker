@@ -77,6 +77,17 @@ latest_date = df["date"].max()
 latest_df = df[df["date"] == latest_date]
 total_tvl = latest_df["tvl"].sum()
 
+# محاسبه TVL روز قبل
+prev_date = latest_date - pd.Timedelta(days=1)
+prev_df = df[df["date"] == prev_date]
+prev_total_tvl = prev_df["tvl"].sum() if not prev_df.empty else None
+
+# محاسبه درصد تغییر
+if prev_total_tvl and prev_total_tvl > 0:
+    change_pct = (total_tvl - prev_total_tvl) / prev_total_tvl * 100
+else:
+    change_pct = None
+
 col1, col2 = st.columns(2)
 with col1:
     fig3 = px.pie(
@@ -87,8 +98,19 @@ with col1:
         title=f"TVL by Asset Type ({latest_date.date()})",
     )
     st.plotly_chart(fig3, use_container_width=True)
+
 with col2:
-    st.metric(label="Total TVL", value=f"${total_tvl:,.0f}")
+    st.markdown("### Total TVL")
+    st.markdown(f"<h1 style='margin: 0;'>${total_tvl:,.0f}</h1>", unsafe_allow_html=True)
+    if change_pct is not None:
+        color = "green" if change_pct > 0 else "red"
+        sign = "+" if change_pct > 0 else ""
+        st.markdown(
+            f"<p style='color:{color}; font-size: 24px; margin: 0;'>{sign}{change_pct:.2f}% in 24h</p>", 
+            unsafe_allow_html=True
+        )
+    else:
+        st.markdown("<p style='color:gray;'>No data for previous day</p>", unsafe_allow_html=True)
 
 # --- ردیف چهارم: سه Area Chart ---
 st.subheader("Monthly TVL Stats")
