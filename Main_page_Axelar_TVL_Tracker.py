@@ -100,7 +100,7 @@ with col1:
     st.plotly_chart(fig3, use_container_width=True)
 
 with col2:
-    st.markdown("### Total TVL")
+    st.markdown("### Axelar Current TVL")
     st.markdown(f"<h1 style='margin: 0;'>${total_tvl:,.0f}</h1>", unsafe_allow_html=True)
     if change_pct is not None:
         color = "green" if change_pct > 0 else "red"
