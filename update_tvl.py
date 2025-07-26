@@ -7,8 +7,9 @@ API_URL = "https://api.dune.com/api/v1/query/5535180/results?api_key=kmCBMTxWKBx
 
 try:
     df = pd.read_csv(CSV_FILE)
-    # تبدیل تاریخ با حدس فرمت به صورت خودکار
-    df["date"] = pd.to_datetime(df["date"], infer_datetime_format=True).dt.date
+    # فقط yyyy-mm-dd بگیر (10 کاراکتر اول)
+    df["date"] = df["date"].str.slice(0, 10)
+    df["date"] = pd.to_datetime(df["date"]).dt.date
 except FileNotFoundError:
     df = pd.DataFrame(columns=["date", "tvl", "asset_type"])
 
