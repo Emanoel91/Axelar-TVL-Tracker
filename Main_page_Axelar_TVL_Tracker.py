@@ -23,17 +23,10 @@ df = df.dropna(subset=["tvl"])
 # مرتب‌سازی داده‌ها
 df = df.sort_values("date")
 
-# رنگ اختصاصی
-color_map = {
-    "ITS": "#ff7400",
-    "non-ITS": "#00a1f7"
-}
-
 st.title("Axelar TVL Dashboard")
 
 # ---- ردیف اول: Stacked Bar Chart ----
 st.subheader("Axelar TVL Over Time - Stacked Bar")
-
 fig1 = px.bar(
     df,
     x="date",
@@ -41,16 +34,13 @@ fig1 = px.bar(
     color="asset_type",
     title="Axelar TVL Over Time",
     labels={"tvl": "TVL", "date": "Date"},
-    color_discrete_map=color_map,
-    category_orders={"asset_type": ["non-ITS", "ITS"]}  # این ترتیب، ITS را بالاتر می‌آورد
+    category_orders={"asset_type": ["non-ITS", "ITS"]}  # ترتیب رسم stacked bar (ITS بالای non-ITS)
 )
 st.plotly_chart(fig1, use_container_width=True)
 
 # ---- ردیف دوم: Normalized Area Chart ----
 st.subheader("Axelar TVL Over Time - Normalized Area")
-
 df_grouped = df.groupby(["date", "asset_type"])["tvl"].sum().reset_index()
-
 fig2 = px.area(
     df_grouped,
     x="date",
@@ -58,8 +48,6 @@ fig2 = px.area(
     color="asset_type",
     groupnorm="fraction",
     title="Normalized Axelar TVL by Asset Type",
-    color_discrete_map=color_map,
-    category_orders={"asset_type": ["non-ITS", "ITS"]}
 )
 st.plotly_chart(fig2, use_container_width=True)
 
@@ -77,7 +65,6 @@ with col1:
         values="tvl",
         hole=0.5,
         title=f"TVL by Asset Type ({latest_date.date()})",
-        color_discrete_map=color_map
     )
     st.plotly_chart(fig3, use_container_width=True)
 with col2:
@@ -85,7 +72,6 @@ with col2:
 
 # ---- ردیف چهارم: سه Area Chart ----
 st.subheader("Monthly TVL Stats")
-
 df_monthly = df.copy()
 df_monthly["month"] = df_monthly["date"].dt.to_period("M")
 monthly_stats = df_monthly.groupby(["month", "asset_type"])["tvl"].agg(
@@ -94,7 +80,6 @@ monthly_stats = df_monthly.groupby(["month", "asset_type"])["tvl"].agg(
 monthly_stats["month"] = monthly_stats["month"].dt.to_timestamp()
 
 col1, col2, col3 = st.columns(3)
-
 with col1:
     fig_max = px.area(
         monthly_stats,
@@ -102,8 +87,6 @@ with col1:
         y="max",
         color="asset_type",
         title="Maximum TVL per Month",
-        color_discrete_map=color_map,
-        category_orders={"asset_type": ["non-ITS", "ITS"]}
     )
     st.plotly_chart(fig_max, use_container_width=True)
 
@@ -114,8 +97,6 @@ with col2:
         y="mean",
         color="asset_type",
         title="Average TVL per Month",
-        color_discrete_map=color_map,
-        category_orders={"asset_type": ["non-ITS", "ITS"]}
     )
     st.plotly_chart(fig_avg, use_container_width=True)
 
@@ -126,7 +107,5 @@ with col3:
         y="min",
         color="asset_type",
         title="Minimum TVL per Month",
-        color_discrete_map=color_map,
-        category_orders={"asset_type": ["non-ITS", "ITS"]}
     )
     st.plotly_chart(fig_min, use_container_width=True)
