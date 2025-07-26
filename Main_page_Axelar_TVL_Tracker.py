@@ -26,8 +26,12 @@ df = df.sort_values("date")
 
 st.title("Axelar TVL Dashboard")
 
-# ---- ردیف اول: Stacked Bar Chart ----
+# ---- ردیف اول: Stacked Bar Chart با ITS بالای non-ITS و خط مجموع TVL ----
 st.subheader("Axelar TVL Over Time - Stacked Bar")
+
+# تنظیم ترتیب رسم برای ستون‌ها
+category_order = {"asset_type": ["non-ITS", "ITS"]}
+
 fig1 = px.bar(
     df,
     x="date",
@@ -35,9 +39,25 @@ fig1 = px.bar(
     color="asset_type",
     title="Axelar TVL Over Time",
     labels={"tvl": "TVL", "date": "Date"},
+    category_orders=category_order,
 )
-st.plotly_chart(fig1, use_container_width=True)
 
+# محاسبه مجموع TVL روزانه
+daily_total = df.groupby("date")["tvl"].sum().reset_index()
+
+# اضافه کردن خط مجموع TVL روی محور y
+fig1.add_trace(
+    go.Scatter(
+        x=daily_total["date"],
+        y=daily_total["tvl"],
+        mode="lines",
+        name="Total TVL",
+        line=dict(color="black", width=2),
+        yaxis="y"
+    )
+)
+
+st.plotly_chart(fig1, use_container_width=True)
 # ---- ردیف دوم: Normalized Area Chart ----
 st.subheader("Axelar TVL Over Time - Normalized Area")
 df_grouped = df.groupby(["date", "asset_type"])["tvl"].sum().reset_index()
