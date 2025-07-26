@@ -1,10 +1,11 @@
+
 import pandas as pd
 import plotly.express as px
 import streamlit as st
 
 # --- Page Config: Tab Title & Icon ---
 st.set_page_config(
-    page_title="Axelar Network Performance Analysis",
+    page_title="Axelar TVL Monitoring: ITS vs. Non-ITS",
     page_icon="https://axelarscan.io/logos/logo.png",
     layout="wide"
 )
@@ -34,7 +35,6 @@ fig1 = px.bar(
     color="asset_type",
     title="Axelar TVL Over Time",
     labels={"tvl": "TVL", "date": "Date"},
-    category_orders={"asset_type": ["non-ITS", "ITS"]}  # ترتیب رسم stacked bar (ITS بالای non-ITS)
 )
 st.plotly_chart(fig1, use_container_width=True)
 
