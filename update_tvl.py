@@ -5,15 +5,14 @@ from datetime import date
 CSV_FILE = "tvl_data.csv"
 API_URL = "https://api.dune.com/api/v1/query/5535180/results?api_key=kmCBMTxWKBxn6CVgCXhwDvcFL1fBp6rO"
 
-# سعی می‌کنیم داده‌های قبلی را بخوانیم، اگر نبود فایل جدید می‌سازیم
 try:
-    df = pd.read_csv(CSV_FILE, parse_dates=["date"])
+    df = pd.read_csv(CSV_FILE)
+    df["date"] = pd.to_datetime(df["date"]).dt.date
 except FileNotFoundError:
     df = pd.DataFrame(columns=["date", "tvl", "asset_type"])
 
-last_date = df["date"].max().date() if not df.empty else None
+last_date = df["date"].max() if not df.empty else None
 
-# اگر داده امروز ثبت نشده، داده جدید از API گرفته می‌شود
 if last_date != date.today():
     response = requests.get(API_URL)
     if response.status_code == 200:
