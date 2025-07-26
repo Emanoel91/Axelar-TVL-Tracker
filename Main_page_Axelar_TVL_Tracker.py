@@ -1,142 +1,103 @@
-import streamlit as st
 import pandas as pd
 import plotly.express as px
-
-# --- Page Config: Tab Title & Icon ---
-st.set_page_config(
-    page_title="Axelar TVL Monitoring: ITS vs. Non-ITS",
-    page_icon="https://axelarscan.io/logos/logo.png",
-    layout="wide"
-)
+import streamlit as st
 
 # خواندن داده‌ها
 df = pd.read_csv("tvl_data.csv")
 
-# تبدیل تاریخ به datetime
-df["date"] = pd.to_datetime(df["date"], errors="coerce")
-
-# حذف مقادیر تاریخ نامعتبر
+# تبدیل تاریخ با پشتیبانی از فرمت‌های مختلف
+df["date"] = pd.to_datetime(df["date"], format="mixed", errors="coerce")
 df = df.dropna(subset=["date"])
 
-# نقشه رنگ‌ها
-color_map = {
-    "ITS": "#ff7400",
-    "non-ITS": "#00a1f7"
-}
+# اطمینان از نوع داده‌ها
+df["tvl"] = pd.to_numeric(df["tvl"], errors="coerce")
+df = df.dropna(subset=["tvl"])
 
-# ردیف اول: Stacked Bar Chart
-if not df.empty:
-    fig1 = px.bar(
-        df,
-        x="date",
-        y="tvl",
-        color="asset_type",
-        title="Axelar TVL Over Time",
-        labels={"tvl": "TVL", "date": "Date"},
-        color_discrete_map=color_map,
-        category_orders={"asset_type": ["non-ITS", "ITS"]}
-    )
-    st.plotly_chart(fig1, use_container_width=True)
-else:
-    st.warning("No data available for Axelar TVL Over Time.")
+# مرتب‌سازی داده‌ها
+df = df.sort_values("date")
 
-# ردیف دوم: Normalized Area Chart
-if not df.empty:
-    fig2 = px.area(
-        df,
-        x="date",
-        y="tvl",
-        color="asset_type",
-        groupnorm="fraction",
-        title="Axelar TVL Over Time (Normalized)",
-        labels={"tvl": "TVL Share", "date": "Date"},
-        color_discrete_map=color_map,
-        category_orders={"asset_type": ["non-ITS", "ITS"]}
-    )
-    st.plotly_chart(fig2, use_container_width=True)
-else:
-    st.warning("No data available for normalized TVL chart.")
+st.title("Axelar TVL Dashboard")
 
-# داده‌های آخرین روز
-if not df.empty:
-    last_date = df["date"].max()
-    last_day_df = df[df["date"] == last_date]
-else:
-    last_day_df = pd.DataFrame()
+# ---- ردیف اول: Stacked Bar Chart ----
+st.subheader("Axelar TVL Over Time - Stacked Bar")
+fig1 = px.bar(
+    df,
+    x="date",
+    y="tvl",
+    color="asset_type",
+    title="Axelar TVL Over Time",
+    labels={"tvl": "TVL", "date": "Date"},
+)
+st.plotly_chart(fig1, use_container_width=True)
 
-# ردیف سوم: Donut Chart + KPI
-col1, col2 = st.columns([2, 1])
+# ---- ردیف دوم: Normalized Area Chart ----
+st.subheader("Axelar TVL Over Time - Normalized Area")
+df_grouped = df.groupby(["date", "asset_type"])["tvl"].sum().reset_index()
+fig2 = px.area(
+    df_grouped,
+    x="date",
+    y="tvl",
+    color="asset_type",
+    groupnorm="fraction",
+    title="Normalized Axelar TVL by Asset Type",
+)
+st.plotly_chart(fig2, use_container_width=True)
 
+# ---- ردیف سوم: Donut chart و KPI ----
+st.subheader("Latest Day TVL Breakdown")
+latest_date = df["date"].max()
+latest_df = df[df["date"] == latest_date]
+total_tvl = latest_df["tvl"].sum()
+
+col1, col2 = st.columns(2)
 with col1:
-    if not last_day_df.empty:
-        fig3 = px.pie(
-            last_day_df,
-            names="asset_type",
-            values="tvl",
-            title=f"TVL Distribution on {last_date.date()}",
-            color="asset_type",
-            color_discrete_map=color_map,
-            hole=0.5
-        )
-        st.plotly_chart(fig3, use_container_width=True)
-    else:
-        st.warning("No data available for donut chart.")
+    fig3 = px.pie(
+        latest_df,
+        names="asset_type",
+        values="tvl",
+        hole=0.5,
+        title=f"TVL by Asset Type ({latest_date.date()})",
+    )
+    st.plotly_chart(fig3, use_container_width=True)
+with col2:
+    st.metric(label="Total TVL", value=f"${total_tvl:,.0f}")
+
+# ---- ردیف چهارم: سه Area Chart ----
+st.subheader("Monthly TVL Stats")
+df_monthly = df.copy()
+df_monthly["month"] = df_monthly["date"].dt.to_period("M")
+monthly_stats = df_monthly.groupby(["month", "asset_type"])["tvl"].agg(
+    ["max", "mean", "min"]
+).reset_index()
+monthly_stats["month"] = monthly_stats["month"].dt.to_timestamp()
+
+col1, col2, col3 = st.columns(3)
+with col1:
+    fig_max = px.area(
+        monthly_stats,
+        x="month",
+        y="max",
+        color="asset_type",
+        title="Maximum TVL per Month",
+    )
+    st.plotly_chart(fig_max, use_container_width=True)
 
 with col2:
-    total_tvl = last_day_df["tvl"].sum() if not last_day_df.empty else None
-    if pd.notna(total_tvl):
-        st.metric(label="Total TVL", value=f"${total_tvl:,.0f}")
-    else:
-        st.metric(label="Total TVL", value="No data")
+    fig_avg = px.area(
+        monthly_stats,
+        x="month",
+        y="mean",
+        color="asset_type",
+        title="Average TVL per Month",
+    )
+    st.plotly_chart(fig_avg, use_container_width=True)
 
-# ردیف چهارم: Maximum, Average, Minimum TVL per Month
-if not df.empty:
-    df["month"] = df["date"].dt.to_period("M")
-
-    monthly = df.groupby(["month", "asset_type"])["tvl"].agg(
-        max_tvl="max", avg_tvl="mean", min_tvl="min"
-    ).reset_index()
-    monthly["month"] = monthly["month"].dt.to_timestamp()
-
-    if monthly.empty:
-        st.warning("No monthly data available to display.")
-    else:
-        col3, col4, col5 = st.columns(3)
-
-        with col3:
-            fig4 = px.area(
-                monthly,
-                x="month",
-                y="max_tvl",
-                color="asset_type",
-                title="Maximum TVL per Month",
-                color_discrete_map=color_map,
-                category_orders={"asset_type": ["non-ITS", "ITS"]}
-            )
-            st.plotly_chart(fig4, use_container_width=True)
-
-        with col4:
-            fig5 = px.area(
-                monthly,
-                x="month",
-                y="avg_tvl",
-                color="asset_type",
-                title="Average TVL per Month",
-                color_discrete_map=color_map,
-                category_orders={"asset_type": ["non-ITS", "ITS"]}
-            )
-            st.plotly_chart(fig5, use_container_width=True)
-
-        with col5:
-            fig6 = px.area(
-                monthly,
-                x="month",
-                y="min_tvl",
-                color="asset_type",
-                title="Minimum TVL per Month",
-                color_discrete_map=color_map,
-                category_orders={"asset_type": ["non-ITS", "ITS"]}
-            )
-            st.plotly_chart(fig6, use_container_width=True)
-else:
-    st.warning("No data available for monthly charts.")
+with col3:
+    fig_min = px.area(
+        monthly_stats,
+        x="month",
+        y="min",
+        color="asset_type",
+        title="Minimum TVL per Month",
+    )
+    st.plotly_chart(fig_min, use_container_width=True)
