@@ -1,11 +1,11 @@
-
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objs as go
 import streamlit as st
 
 # --- Page Config: Tab Title & Icon ---
 st.set_page_config(
-    page_title="Axelar TVL Monitoring: ITS vs. Non-ITS",
+    page_title="Axelar Network Performance Analysis",
     page_icon="https://axelarscan.io/logos/logo.png",
     layout="wide"
 )
@@ -26,10 +26,10 @@ df = df.sort_values("date")
 
 st.title("Axelar TVL Dashboard")
 
-# ---- ردیف اول: Stacked Bar Chart با ITS بالای non-ITS و خط مجموع TVL ----
+# --- ردیف اول: Stacked Bar Chart با ITS بالای non-ITS و خط مجموع TVL ---
 st.subheader("Axelar TVL Over Time - Stacked Bar")
 
-# تنظیم ترتیب رسم برای ستون‌ها
+# ترتیب رسم برای ستون‌ها (ITS روی non-ITS قرار می‌گیرد)
 category_order = {"asset_type": ["non-ITS", "ITS"]}
 
 fig1 = px.bar(
@@ -58,7 +58,8 @@ fig1.add_trace(
 )
 
 st.plotly_chart(fig1, use_container_width=True)
-# ---- ردیف دوم: Normalized Area Chart ----
+
+# --- ردیف دوم: Normalized Area Chart ---
 st.subheader("Axelar TVL Over Time - Normalized Area")
 df_grouped = df.groupby(["date", "asset_type"])["tvl"].sum().reset_index()
 fig2 = px.area(
@@ -71,7 +72,7 @@ fig2 = px.area(
 )
 st.plotly_chart(fig2, use_container_width=True)
 
-# ---- ردیف سوم: Donut chart و KPI ----
+# --- ردیف سوم: Donut chart و KPI ---
 st.subheader("Latest Day TVL Breakdown")
 latest_date = df["date"].max()
 latest_df = df[df["date"] == latest_date]
@@ -90,7 +91,7 @@ with col1:
 with col2:
     st.metric(label="Total TVL", value=f"${total_tvl:,.0f}")
 
-# ---- ردیف چهارم: سه Area Chart ----
+# --- ردیف چهارم: سه Area Chart ---
 st.subheader("Monthly TVL Stats")
 df_monthly = df.copy()
 df_monthly["month"] = df_monthly["date"].dt.to_period("M")
