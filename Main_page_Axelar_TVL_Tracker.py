@@ -2,6 +2,13 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
+# --- Page Config: Tab Title & Icon ---
+st.set_page_config(
+    page_title="Axelar Network Performance Analysis",
+    page_icon="https://axelarscan.io/logos/logo.png",
+    layout="wide"
+)
+
 # خواندن داده‌ها
 df = pd.read_csv("tvl_data.csv")
 
