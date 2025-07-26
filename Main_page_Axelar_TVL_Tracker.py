@@ -27,7 +27,7 @@ df = df.sort_values("date")
 st.title("💸Axelar TVL Monitoring: ITS vs. Non-ITS")
 
 # --- ردیف اول: Stacked Bar Chart با ITS بالای non-ITS و خط مجموع TVL ---
-
+st.subheader("🔔The TVL data for the Axelar network is updated every 24 hours.")
 # ترتیب رسم برای ستون‌ها (ITS روی non-ITS قرار می‌گیرد)
 category_order = {"asset_type": ["non-ITS", "ITS"]}
 
