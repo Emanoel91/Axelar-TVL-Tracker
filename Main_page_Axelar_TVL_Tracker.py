@@ -27,7 +27,6 @@ df = df.sort_values("date")
 st.title("💸Axelar TVL Monitoring: ITS vs. Non-ITS")
 
 # --- ردیف اول: Stacked Bar Chart با ITS بالای non-ITS و خط مجموع TVL ---
-st.subheader("Axelar TVL Over Time - Stacked Bar")
 
 # ترتیب رسم برای ستون‌ها (ITS روی non-ITS قرار می‌گیرد)
 category_order = {"asset_type": ["non-ITS", "ITS"]}
@@ -38,7 +37,7 @@ fig1 = px.bar(
     y="tvl",
     color="asset_type",
     title="Axelar TVL Over Time",
-    labels={"tvl": "TVL", "date": "Date"},
+    labels={"tvl": "TVL ($USD)", "date": "Date"},
     category_orders=category_order,
 )
 
@@ -60,7 +59,7 @@ fig1.add_trace(
 st.plotly_chart(fig1, use_container_width=True)
 
 # --- ردیف دوم: Normalized Area Chart ---
-st.subheader("Axelar TVL Over Time - Normalized Area")
+
 df_grouped = df.groupby(["date", "asset_type"])["tvl"].sum().reset_index()
 fig2 = px.area(
     df_grouped,
@@ -68,7 +67,7 @@ fig2 = px.area(
     y="tvl",
     color="asset_type",
     groupnorm="fraction",
-    title="Normalized Axelar TVL by Asset Type",
+    title="Percentage Share of ITS and Non-ITS Assets in TVL Over Time (%)",
 )
 st.plotly_chart(fig2, use_container_width=True)
 
