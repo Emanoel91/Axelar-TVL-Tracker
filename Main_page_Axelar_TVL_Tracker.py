@@ -166,3 +166,34 @@ with col3:
         title="Minimum TVL per Month",
     )
     st.plotly_chart(fig_min, use_container_width=True)
+
+# --- Reference and Rebuild Info --------------------------------------------------------------------------------------
+st.markdown(
+    """
+    
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <img src="https://pbs.twimg.com/profile_images/1841479747332608000/bindDGZQ_400x400.jpg" alt="Eman Raz" style="width:25px; height:25px; border-radius: 50%;">
+            <span>Built by: <a href="https://x.com/0xeman_raz" target="_blank">Eman Raz</a></span>
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+# --- Links with Logos ---------------------------------------------------------------------------------------
+st.markdown(
+    """
+    <div style="font-size: 16px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <img src="https://axelarscan.io/logos/logo.png" alt="Axelar" style="width:20px; height:20px;">
+            <a href="https://www.axelar.network/" target="_blank">https://www.axelar.network/</a>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <img src="https://cdn-icons-png.flaticon.com/512/5968/5968958.png" alt="X" style="width:20px; height:20px;">
+            <a href="https://x.com/axelar" target="_blank">https://x.com/axelar</a>
+        </div>
+        
+    </div>
+    """,
+    unsafe_allow_html=True
+)
