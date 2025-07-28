@@ -10,18 +10,18 @@ st.set_page_config(
     layout="wide"
 )
 
-# خواندن داده‌ها
+# reading data-------------------------------------------------------
 df = pd.read_csv("tvl_data.csv")
 
-# تبدیل تاریخ با پشتیبانی از فرمت‌های مختلف
+# convert date to supported date format -------------------------------------------
 df["date"] = pd.to_datetime(df["date"], format="mixed", errors="coerce")
 df = df.dropna(subset=["date"])
 
-# اطمینان از نوع داده‌ها
+# Data type assurance ---------------------------------------
 df["tvl"] = pd.to_numeric(df["tvl"], errors="coerce")
 df = df.dropna(subset=["tvl"])
 
-# مرتب‌سازی داده‌ها
+# Data sorting
 df = df.sort_values("date")
 
 # --- Title with Logo ---------------------------------------------------------------------------------------------------
@@ -36,14 +36,14 @@ st.markdown(
 )
 # -----------------------------------------------------------------------------------------------------------------------
 
-# --- ردیف اول: Stacked Bar Chart با ITS بالای non-ITS و خط مجموع TVL ---
+# --- Row 1: Stacked Bar Chart ------------------
 
 st.info(
     "🔔The TVL data for the Axelar network is updated every 24 hours."
 
 )
 
-# ترتیب رسم برای ستون‌ها (ITS روی non-ITS قرار می‌گیرد)
+# Plot order for columns (ITS is placed above non-ITS) --------------------------------
 category_order = {"asset_type": ["non-ITS", "ITS"]}
 
 fig1 = px.bar(
@@ -56,10 +56,10 @@ fig1 = px.bar(
     category_orders=category_order,
 )
 
-# محاسبه مجموع TVL روزانه
+# Calculate total daily TVL ---------------------
 daily_total = df.groupby("date")["tvl"].sum().reset_index()
 
-# اضافه کردن خط مجموع TVL روی محور y
+# Add TVL_total line on y-axis -----------------------------
 fig1.add_trace(
     go.Scatter(
         x=daily_total["date"],
@@ -73,7 +73,7 @@ fig1.add_trace(
 
 st.plotly_chart(fig1, use_container_width=True)
 
-# --- ردیف دوم: Normalized Area Chart ---
+# --- Row 2: Normalized Area Chart --------------------------------
 
 df_grouped = df.groupby(["date", "asset_type"])["tvl"].sum().reset_index()
 fig2 = px.area(
@@ -86,18 +86,18 @@ fig2 = px.area(
 )
 st.plotly_chart(fig2, use_container_width=True)
 
-# --- ردیف سوم: Donut chart و KPI ---
+# --- Row3: Donut chart و KPI ---------------------------------
 st.subheader("Latest Day TVL Breakdown")
 latest_date = df["date"].max()
 latest_df = df[df["date"] == latest_date]
 total_tvl = latest_df["tvl"].sum()
 
-# محاسبه TVL روز قبل
+# Calculate the previous day's TVL ----------------------
 prev_date = latest_date - pd.Timedelta(days=1)
 prev_df = df[df["date"] == prev_date]
 prev_total_tvl = prev_df["tvl"].sum() if not prev_df.empty else None
 
-# محاسبه درصد تغییر
+# Calculate the percentage change ---------------------
 if prev_total_tvl and prev_total_tvl > 0:
     change_pct = (total_tvl - prev_total_tvl) / prev_total_tvl * 100
 else:
@@ -127,7 +127,7 @@ with col2:
     else:
         st.markdown("<p style='color:gray;'>No data for previous day</p>", unsafe_allow_html=True)
 
-# --- ردیف چهارم: سه Area Chart ---
+# --- Row4: Area Chart ---
 st.subheader("Monthly TVL Stats")
 df_monthly = df.copy()
 df_monthly["month"] = df_monthly["date"].dt.to_period("M")
