@@ -24,7 +24,17 @@ df = df.dropna(subset=["tvl"])
 # مرتب‌سازی داده‌ها
 df = df.sort_values("date")
 
-st.title("💸Axelar TVL Monitoring: ITS vs. Non-ITS")
+# --- Title with Logo ---------------------------------------------------------------------------------------------------
+st.markdown(
+    """
+    <div style="display: flex; align-items: center; gap: 15px;">
+        <img src="https://axelarscan.io/logos/chains/axelarnet.svg" alt="Axelar Logo" style="width:60px; height:60px;">
+        <h1 style="margin: 0;">Axelar TVL Monitoring: ITS vs. Non-ITS</h1>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+# -----------------------------------------------------------------------------------------------------------------------
 
 # --- ردیف اول: Stacked Bar Chart با ITS بالای non-ITS و خط مجموع TVL ---
 st.markdown(""" 🔔The TVL data for the Axelar network is updated every 24 hours.""")
