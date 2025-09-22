@@ -2,11 +2,11 @@ name: Update TVL Data
 
 on:
   schedule:
-    - cron: '0 6 * * *'  # هر روز ساعت 6 صبح UTC
-  workflow_dispatch:      # قابلیت اجرای دستی
+    - cron: '0 6 * * *'  # every day 6 am UTC
+  workflow_dispatch:      # manual run
 
 permissions:
-  contents: write         # برای commit و push لازم است
+  contents: write         
 
 jobs:
   update-data:
