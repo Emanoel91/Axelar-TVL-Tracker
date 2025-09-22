@@ -7,7 +7,6 @@ API_URL = "https://api.dune.com/api/v1/query/5535180/results?api_key=kmCBMTxWKBx
 
 try:
     df = pd.read_csv(CSV_FILE)
-    # فقط yyyy-mm-dd بگیر (10 کاراکتر اول)
     df["date"] = df["date"].str.slice(0, 10)
     df["date"] = pd.to_datetime(df["date"]).dt.date
 except FileNotFoundError:
@@ -27,12 +26,12 @@ if last_date != date.today():
             if not today_rows.empty:
                 df = pd.concat([df, today_rows], ignore_index=True)
                 df.to_csv(CSV_FILE, index=False)
-                print("داده جدید ذخیره شد.")
+                print("New data has been received.")
             else:
-                print("هیچ داده‌ای برای امروز یافت نشد.")
+                print("No data found for today.")
         else:
-            print("خطا: ساختار داده API تغییر کرده است.")
+            print("Error: API Data structure has been changed.")
     else:
-        print(f"خطا در دریافت داده از API: {response.status_code}")
+        print(f"API data receiving error: {response.status_code}")
 else:
-    print("داده امروز قبلاً ثبت شده است.")
+    print("Today data has been recorded previously.")
