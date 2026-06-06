@@ -2,7 +2,7 @@ import pandas as pd
 import requests
 from datetime import date
 
-CSV_FILE = "tvl_data.csv"
+CSV_FILE = "tvl_data.csv" 
 API_URL = "https://api.dune.com/api/v1/query/5535180/results?api_key=kmCBMTxWKBxn6CVgCXhwDvcFL1fBp6rO"
 
 try:
