@@ -1,37 +1,63 @@
 import pandas as pd
 import requests
-from datetime import date
 
-CSV_FILE = "tvl_data.csv" 
+CSV_FILE = "tvl_data.csv"
 API_URL = "https://api.dune.com/api/v1/query/5535180/results?api_key=kmCBMTxWKBxn6CVgCXhwDvcFL1fBp6rO"
 
 try:
     df = pd.read_csv(CSV_FILE)
-    df["date"] = df["date"].str.slice(0, 10)
-    df["date"] = pd.to_datetime(df["date"]).dt.date
+
+    if not df.empty:
+        df["date"] = pd.to_datetime(df["date"]).dt.date
+
 except FileNotFoundError:
     df = pd.DataFrame(columns=["date", "tvl", "asset_type"])
 
-last_date = df["date"].max() if not df.empty else None
+last_saved_date = None
 
-if last_date != date.today():
-    response = requests.get(API_URL)
-    if response.status_code == 200:
-        data = response.json()
-        if "result" in data and "rows" in data["result"]:
-            new_rows = pd.DataFrame(data["result"]["rows"])
-            new_rows["date"] = pd.to_datetime(new_rows["date"]).dt.date
+if not df.empty:
+    last_saved_date = df["date"].max()
 
-            today_rows = new_rows[new_rows["date"] == date.today()]
-            if not today_rows.empty:
-                df = pd.concat([df, today_rows], ignore_index=True)
-                df.to_csv(CSV_FILE, index=False)
-                print("New data has been received.")
-            else:
-                print("No data found for today.")
-        else:
-            print("Error: API Data structure has been changed.")
+try:
+    response = requests.get(API_URL, timeout=30)
+    response.raise_for_status()
+
+    data = response.json()
+
+    if (
+        "result" not in data
+        or "rows" not in data["result"]
+        or len(data["result"]["rows"]) == 0
+    ):
+        print("Error: API data structure is invalid or no rows returned.")
+        exit()
+
+    api_df = pd.DataFrame(data["result"]["rows"])
+
+    api_df["date"] = pd.to_datetime(api_df["date"]).dt.date
+
+    latest_api_date = api_df["date"].max()
+
+    latest_rows = api_df[api_df["date"] == latest_api_date]
+
+    print(f"Latest date in API: {latest_api_date}")
+    print(f"Latest date in CSV: {last_saved_date}")
+
+    if last_saved_date is None or latest_api_date > last_saved_date:
+
+        df = pd.concat([df, latest_rows], ignore_index=True)
+
+        df.to_csv(CSV_FILE, index=False)
+
+        print(
+            f"Added {len(latest_rows)} new row(s) for date {latest_api_date}."
+        )
+
     else:
-        print(f"API data receiving error: {response.status_code}")
-else:
-    print("Today data has been recorded previously.")
+        print("CSV file is already up to date.")
+
+except requests.exceptions.RequestException as e:
+    print(f"API request error: {e}")
+
+except Exception as e:
+    print(f"Unexpected error: {e}")
